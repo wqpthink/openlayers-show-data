@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+
+  <link rel="stylesheet" type="text/css" href="./lib/v5.3.0-dist/ol.css">
+  <script src="./lib/v5.3.0-dist/ol.js"></script>
+  <style>
+    body{
+      margin: 0px;
+      padding: 0px;
+    }
+
+    #map{
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+    }
+  </style>
+
+</head>
+<body>
+  <div id="map"></div>
+
+  <script>
+    
+
+    function BD09TWGS84(wgsLat, wgsLon) {
+      var x = wgsLon * 20037508.34 / 180.;
+      var y = Math.log(Math.tan((90. + wgsLat) * this.PI / 360.)) / (this.PI / 180.);
+      y = y * 20037508.34 / 180.;
+      return {'lat' : y, 'lon' : x};
+    }
+
+    var resolutions = [];
+    for(var i=0; i<= 18; i++) {
+        resolutions[i] = Math.pow(2, 18 - i);
+    }
+
+    var tileGrid = new ol.tilegrid.TileGrid({
+        origin:[0, 0],
+        resolutions: resolutions
+    });
+
+    var baiduSource = new ol.source.TileImage({
+        projection: ol.proj.get("EPSG:3857"),
+        tileGrid: tileGrid,
+        tileUrlFunction: function(tileCoord, pixelRatio, proj) {
+            if(!tileCoord){
+                return "";
+            }
+            var [z, x, y] = tileCoord;
+
+            if(x < 0) {
+                x = `M${-x}`;
+            }
+            if(y < 0) {
+                y = `M${-y}`;
+            }
+            var num = Math.floor(Math.random() * 10);
+            return `http://online${num}.map.bdimg.com/tile/?qt=tile&x=${x}&y=${y}&z=${z}&styles=pl&scaler=2&udt=20180303`;
+        }
+    });
+
+    var baiduLayer = new ol.layer.Tile({
+        source: baiduSource
+    });
+
+    var map = new ol.Map({
+        target:"map",
+        layers:[
+            baiduLayer
+        ],
+        view: new ol.View({
+            center: ol.proj.fromLonLat([113.44424399246147,23.185374909094077]),
+            projection: "EPSG:3857",
+            zoom: 12
+        })
+    });
+
+  </script>
+</body>
+</html>
